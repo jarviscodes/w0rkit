@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 import logging
 import click
 from colorama import Fore, Back, Style, init as colorama_init
@@ -57,3 +57,9 @@ def home():
 
     # Return something to keep the client (and flask) happy, just in case.
     return "OK"
+
+
+@app.get("/stager/<path:path>")
+def send_payload(path):
+    click.secho(f"{Fore.LIGHTCYAN_EX}Serving File: {Fore.YELLOW}{path}{Style.RESET_ALL}")
+    return send_from_directory('static/payloads/', path)

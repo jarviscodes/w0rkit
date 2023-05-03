@@ -16,9 +16,14 @@ def main():
 @main.command()
 @click.option("-l", "--listen_address", help="Address the server should listen on.", required=True)
 @click.option("-p", "--listen_port", help="Port to listen on.", required=True)
-def simple(listen_address, listen_port):
+@click.option("-s", "--stager", is_flag=True, default=False, help="Enable the JS static web server")
+def simple(listen_address, listen_port, stager):
     from w0rkit.web.simple_mode import app
+    app.config['STAGER_ENABLED'] = stager
+
     showmode("Simple", listen_address, listen_port)
+    click.secho(
+        f"{Fore.CYAN}Stager: {f'{Fore.LIGHTGREEN_EX}ON' if stager else f'{Fore.LIGHTRED_EX}OFF'}{Style.RESET_ALL}")
     app.run(host=listen_address, port=listen_port)
 
 
@@ -26,14 +31,19 @@ def simple(listen_address, listen_port):
 @click.option("-l", "--listen_address", help="Address the server should listen on.", required=True)
 @click.option("-p", "--listen_port", help="Port to listen on.", required=True)
 @click.option("-m", "--magic_param", help="The GET parameter containing your base64 data.")
-def b64d(listen_address, listen_port, magic_param):
+@click.option("-s", "--stager", is_flag=True, default=False, help="Enable the JS static web server")
+def b64d(listen_address, listen_port, magic_param, stager):
     from w0rkit.web.simple_b64 import app
-    showmode("B64Decoder <3", listen_address, listen_port, magic_param=magic_param)
-
     if not magic_param:
         click.secho(f"{Fore.LIGHTYELLOW_EX}No magic param specified (-m)! Defaulting to '?q='{Style.RESET_ALL}")
         magic_param = "q"
+
     app.config['MAGIC_PARAM'] = magic_param
+    app.config['STAGER_ENABLED'] = stager
+
+    showmode("B64Decoder <3", listen_address, listen_port, magic_param=magic_param)
+    click.secho(f"{Fore.CYAN}Stager: {f'{Fore.LIGHTGREEN_EX}ON' if stager else f'{Fore.LIGHTRED_EX}OFF'}{Style.RESET_ALL}")
+
     app.run(host=listen_address, port=listen_port)
 
 
