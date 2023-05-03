@@ -21,12 +21,32 @@ Just logs request source, headers and parameters. GET only.
 
 `w0rkit simple -l [listen_address] -p [listen_port]`
 
+So with `-l 127.0.0.1` and `-p 80`:
+```
+$ curl "http://localhost/?query1=foo&query2=bar&something=somethingelse"
+OK
+```
+
+Result:
+
+![Result](img/simple.png)
+
 ### b64d
 Fetches a `magic_param` from the GET query parameters, base64decodes it and removes url encoding.
 
 `w0rkit b64d -l [listen_address] -p [listen_port] -m [magic_param]`
-
 `-m` is optional and will default to `?q=`
 
-**Note**: Setting `app(host=0.0.0.0)` seemed to default to default gw rather than actually 0.0.0.0.
-Sucks when behind a vpn, so `-l` is obligatory in all instances, `-p` defaults to 5000.
+So with `-l 127.0.0.1`, `-p 80` and `-m decodeme`:
+
+```http
+$ curl "http://localhost/?decodeme=JTNDaHRtbCUzRSUwQSUzQ2hlYWQlM0UlMEElM0N0aXRsZSUzRU9oJTIwd293JTJDJTIwc28lMjByZWFkYWJsZSUzQy90aXRsZSUzRSUwQSUzQy9oZWFkJTNFJTBBJTNDYm9keSUzRSUwQSUzQy9ib2R5JTNFJTBBJTNDL2h0bWwlM0U%3D%3D"
+OK
+```
+
+Result:
+
+![Result](img/b64d.png)
+
+
+Happy Hunting!
