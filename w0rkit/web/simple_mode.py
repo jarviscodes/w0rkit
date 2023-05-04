@@ -2,6 +2,7 @@ from flask import Flask, request, send_from_directory
 import logging
 import click
 from colorama import Fore, Back, Style, init as colorama_init
+from w0rkit.web.common.utils import stager_route
 
 # Initialize the app and colorama
 app = Flask(__name__)
@@ -61,5 +62,4 @@ def home():
 
 @app.get("/stager/<path:path>")
 def send_payload(path):
-    click.secho(f"{Fore.LIGHTCYAN_EX}Serving File: {Fore.YELLOW}{path}{Style.RESET_ALL}")
-    return send_from_directory('static/payloads/', path)
+    return stager_route(path)
