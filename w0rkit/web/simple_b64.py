@@ -1,11 +1,11 @@
 import os.path
-
 from flask import Flask, request, g, send_from_directory
 import logging
 import click
 from colorama import Fore, Back, Style, init as colorama_init
 from urllib.parse import unquote
 from base64 import b64decode
+from w0rkit.web.common.utils import stager_route
 
 # Initialize the app and colorama
 app = Flask(__name__)
