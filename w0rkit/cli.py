@@ -15,7 +15,7 @@ def main():
     print(f"W0rkit CLI {VERSION}")
 
 
-@click.group()
+@main.group()
 def web():
     print(f"Web Mode!")
 
