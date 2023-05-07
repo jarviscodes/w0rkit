@@ -33,7 +33,7 @@ def lfi():
 def interrogate(injectable, filter_mode, suffix, repeat_prefix):
     injection_char = lfi_modes_to_chars.get("default")
     if filter_mode:
-        injection_char = lfi_modes_to_chars.get("filter_mode", None)
+        injection_char = lfi_modes_to_chars.get(filter_mode, None)
     if not injection_char:
         click.secho("Invalid filter mode, defaulting to '../'")
         injection_char = lfi_modes_to_chars.get("default")
