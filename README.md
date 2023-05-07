@@ -14,12 +14,20 @@ Done :-)
 
 ## Usage
 
+A new way of running the tool is introduced in order to make it more extensible.
+Currently under very active development of LFI mode (unstable, don't expect it to work for your purpose)
+The `web` mode is stable and can be used as demonstrated below.
+
+The new modes are `web` and `lfi`, where `web` contains the old stager, and response receiver/decoder.
+
+### Web
+
 Currently supports 2 modes. (`simple` and `b64d`).
 
-### Simple
+#### Simple
 Just logs request source, headers and parameters. GET only.
 
-`w0rkit simple -l [listen_address] -p [listen_port]`
+`w0rkit web simple -l [listen_address] -p [listen_port]`
 
 So with `-l 127.0.0.1` and `-p 80`:
 ```
@@ -31,10 +39,10 @@ Result:
 
 ![Result](img/simple.png)
 
-### b64d
+#### b64d
 Fetches a `magic_param` from the GET query parameters, base64decodes it and removes url encoding.
 
-`w0rkit b64d -l [listen_address] -p [listen_port] -m [magic_param]`
+`w0rkit web b64d -l [listen_address] -p [listen_port] -m [magic_param]`
 `-m` is optional and will default to `?q=`
 
 So with `-l 127.0.0.1`, `-p 80` and `-m decodeme`:
@@ -49,7 +57,7 @@ Result:
 ![Result](img/b64d.png)
 
 
-### Stager
+#### Stager
 All apps also have a stager route, as of writing it isn't configurable and reads directly out of `w0rkit/web/static/payloads/`
 The stager can be used in a lot of different attacks. This is a safer replacement-to-be for always running `python3 -m http.server` :-)
 
@@ -72,9 +80,18 @@ Result:
 ![Result](img/stager_b64d.png)
 
 
+### LFI
+
+#### Interrogate
+
+Interactive LFI interrogation mode. Facilitates requesting and decoding files after finding a succesful exploitation.
+
+`w0rkit lfi interrogate -i "http://vulnerable.target/index.php?filepath=" --filter-mode spf`
+
+
 ### Useful for
 * Serve Anything, like RFI or DTD Payloads(and exfiltrate easily with `b64d` in OOB situations)
 * XSS Pivoting
-* Interactive LFI (Soon™) 
+* Interactive LFI (~~Soon™~~ WIP!) 
 
 Happy Hunting!
