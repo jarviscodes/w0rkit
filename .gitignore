@@ -2,3 +2,4 @@ venv/
 poetry.lock
 __pycache__/
 .idea/
+w0rkit/web/static/payloads/
