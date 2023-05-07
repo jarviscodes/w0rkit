@@ -28,10 +28,14 @@ def lfi():
 
 
 def zip_decoder(response):
-    with zipfile.ZipFile(io.BytesIO(response.content)) as zip_content:
-        for zipinfo in zip_content.infolist():
-            with zip_content.open(zipinfo) as unzipped_file:
-                yield zipinfo.filename, unzipped_file.read().decode('utf-8')
+    try:
+        with zipfile.ZipFile(io.BytesIO(response.content)) as zip_content:
+            for zipinfo in zip_content.infolist():
+                with zip_content.open(zipinfo) as unzipped_file:
+                    yield zipinfo.filename, unzipped_file.read().decode('utf-8')
+    except zipfile.BadZipfile:
+        click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.LIGHTRED_EX} Decoder failed. Either a 404 or you're using an incorrect decoder (ZIP)")
+
 
 def base64_decoder(response):
     print("Not implemented yet :(")
