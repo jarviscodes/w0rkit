@@ -31,7 +31,7 @@ def zip_decoder(response):
     with zipfile.ZipFile(io.BytesIO(response.content)) as zip_content:
         for zipinfo in zip_content.infolist():
             with zip_content.open(zipinfo) as unzipped_file:
-                yield zipinfo.filename, unzipped_file
+                yield zipinfo.filename, unzipped_file.read()
 
 def base64_decoder(response):
     print("Not implemented yet :(")
