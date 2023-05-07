@@ -28,8 +28,8 @@ def lfi():
 @lfi.command()
 @click.option("-i", "--injectable", help="The full target where the LFI is present. (ex. http://vuln.site/?download=)", required=True)
 @click.option("--fm", "--filter-mode", help="Specify here if the target is somehow filtering injection. (Current options: 'spf')")
-@click.option("-s", "--suffix", help="Specify the suffix to be appended to the LFI payload. (e.g.: %00.pdf)", default="", type=click.types.INT)
-@click.option("--rp", "--repeat-prefix", help="Specify how many times to repeat injection characters. default = 5 (enough to traverse out of most default webroots)", default=5)
+@click.option("-s", "--suffix", help="Specify the suffix to be appended to the LFI payload. (e.g.: %00.pdf)", default="")
+@click.option("--rp", "--repeat-prefix", help="Specify how many times to repeat injection characters. default = 5 (enough to traverse out of most default webroots)", default=5, type=click.types.INT)
 def interrogate(injectable, filter_mode, suffix, repeat_prefix):
     injection_char = lfi_modes_to_chars.get("default")
     if filter_mode:
