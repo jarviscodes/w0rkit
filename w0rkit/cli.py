@@ -7,7 +7,7 @@ import zipfile
 from w0rkit.web.web_modes import SimpleMode, Base64Mode
 
 
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 colorama_init(autoreset=True)
 
