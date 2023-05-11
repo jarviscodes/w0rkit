@@ -6,11 +6,18 @@ Disclaimer: Pls no evil :(
 
 ## Installation
 
-1. `git clone ...`
+1. `git clone ...; cd w0rkit`
 
 2. `poetry install`
 
+3. `poetry shell`
+
 Done :-)
+
+## Refactoring Branch
+
+Since most of this tool is being scripted together on the fly, we have a dedicated branch to refactoring.
+The main branch *should* contain a working version, but usage, code and some minor features might be different in the unstable refactoring branch. 
 
 ## Usage
 
@@ -58,10 +65,14 @@ Result:
 
 
 #### Stager
-All apps also have a stager route, as of writing it isn't configurable and reads directly out of `w0rkit/web/static/payloads/`
+All Web-apps also have a stager route, in the first merge of the refactoring branch (v0.0.2), the stager directory is configurable with `-r`.
+By default it will try to load from `/tmp/stager` which defaults to `C:\tmp\stager` on windows.
 The stager can be used in a lot of different attacks. This is a safer replacement-to-be for always running `python3 -m http.server` :-)
 
 An Example stored (hardcoded) blind XSS/CSRF attack is currently included in the stager.
+
+**Note: Please note that the screenshots might differ from the current options, use `--help` to see what is available.**
+
 When running the code:
 
 ```javascript
